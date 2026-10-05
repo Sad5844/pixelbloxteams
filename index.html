@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oyun Merkezi | Brawl Stars, Minecraft, Roblox & Among Us</title>
+    <style>
+        :root {
+            --bg-color: #09090b;
+            --panel-bg: #141417;
+            --accent: #facc15;
+            --accent-hover: #eab308;
+            --text: #e4e4e7;
+            --border-glow: 0 0 15px rgba(250, 204, 21, 0.3);
+        }
+        
+        /* Modern Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-color); }
+        ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden; 
+            width: 100%;
+            line-height: 1.6;
+        }
+        * { box-sizing: border-box; }
+
+        /* Ana Menü Başlık */
+        h1.main-title {
+            text-align: center; font-size: 2.1em; text-transform: uppercase;
+            background: linear-gradient(to right, #ffffff, #a1a1aa, #ffffff);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            text-shadow: 0px 4px 15px rgba(250, 204, 21, 0.2);
+            margin-top: 25px; letter-spacing: 2px; font-weight: 800;
+        }
+
+        .intro-section {
+            background: linear-gradient(145deg, #18181b, #27272a); padding: 30px; margin: 15px auto;
+            width: 90%; max-width: 800px; border-radius: 14px; border-left: 6px solid var(--accent);
+            text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            position: relative; overflow: hidden;
+        }
+        .intro-section::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(250,204,21,0.03) 0%, transparent 60%);
+            z-index: 0; pointer-events: none;
+        }
+        .intro-section h2 { color: var(--accent); font-size: 1.8em; margin-top: 0; position: relative; z-index: 1;}
+        .intro-section p { font-size: 1.05em; color: #d4d4d8; margin-bottom: 12px; position: relative; z-index: 1;}
+        .intro-section .trailer { 
+            background: rgba(0, 0, 0, 0.4); padding: 15px; border-radius: 10px; 
+            border: 1px solid #3f3f46; display: inline-block; margin-top: 10px; color: #f4f4f5;
+            position: relative; z-index: 1; box-shadow: inset 0 2px 10px rgba(0,0,0,0.5); font-size: 0.95em;
+        }
+
+        /* Sekmeler (Tabs) */
+        .tabs { display: flex; justify-content: center; gap: 15px; margin: 30px 0; flex-wrap: wrap; padding: 0 10px; }
+        .tab-btn {
+            background-color: #27272a; color: white; border: 2px solid transparent; padding: 14px 35px;
+            font-size: 17px; cursor: pointer; border-radius: 10px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 600; letter-spacing: 0.5px;
+        }
+        .tab-btn:hover { background-color: #3f3f46; border-color: var(--accent); box-shadow: var(--border-glow); }
+        .tab-btn.active { 
+            background-color: var(--accent); color: #000; box-shadow: 0 0 20px rgba(250, 204, 21, 0.6); 
+            transform: translateY(-2px);
+        }
+        .tab-btn:active { transform: scale(0.95); }
+
+        .section {
+            display: none; background: var(--panel-bg); padding: 30px; margin: 20px auto 50px auto;
+            width: 95%; max-width: 850px; border-radius: 14px; box-shadow: 0 8px 25px rgba(0,0,0,0.6); 
+            border: 1px solid #27272a;
+        }
+        .section.active { display: block; animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Kayarak Açılma Animasyonu CSS'i */
+        .smooth-expand {
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease-out;
+            opacity: 0;
+            visibility: hidden;
+        }
+        .smooth-expand.open {
+            grid-template-rows: 1fr;
+            opacity: 1;
+            visibility: visible;
+        }
+        .smooth-expand-inner {
+            overflow: hidden;
+        }
+        select, input[type="file"], input[type="range"], button, input[type="text"], textarea {
+            padding: 12px; font-size: 15px; margin-top: 10px; border-radius: 8px; border: none; width: 100%; font-family: inherit;
+        }
+        select, input[type="text"], textarea { 
+            background: #27272a; color: white; border: 2px solid #3f3f46; transition: all 0.4s ease-in-out; 
+        }
+        
+        select:focus, input[type="text"]:focus { outline: none; border-color: var(--accent); box-shadow: var(--border-glow); }
+        select.active-select-glow {
+            border-color: var(--accent);
+            box-shadow: 0 0 15px rgba(250, 204, 21, 0.5);
+            background-color: #1f1f22;
+        }
+        
+        button { 
+            background: #22c55e; color: white; cursor: pointer; font-weight: bold; width: auto; 
+            transition: all 0.2s; border: 1px solid transparent;
+        }
+        button:hover { background: #16a34a; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3); }
+        button:active { transform: scale(0.96); }
+        
+        .btn-download-icon { background: #3b82f6; }
+        .btn-download-icon:hover { background: #2563eb; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+        
+        .btn-download-mc { background: #a855f7; margin-top: 10px; width: 100%; padding: 14px;}
+        .btn-download-mc:hover { background: #9333ea; box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3); }
+
+        .result-box {
+            background: #18181b; padding: 25px; margin-top: 25px; border-left: 5px solid var(--accent);
+            border-radius: 8px; border-right: 1px solid #27272a; border-top: 1px solid #27272a; border-bottom: 1px solid #27272a;
+        }
+        .counter-box { border-left-color: #ef4444; }
+        .friend-box { border-left-color: #3b82f6; background: #0f172a; margin-top: 15px; } 
+        
+        .toggle-friend-btn {
+            background: transparent; color: #3b82f6; border: 2px solid #3b82f6; width: 100%; 
+            padding: 14px; margin-top: 25px; border-radius: 8px; font-size: 16px; cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        .toggle-friend-btn:hover { background: rgba(59, 130, 246, 0.1); box-shadow: 0 0 10px rgba(59, 130, 246, 0.2); }
+        .toggle-friend-btn.active-glow {
+            background: #3b82f6; color: #fff; border-color: #3b82f6;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
+        }
+
+        .toggle-purple-btn {
+            background: transparent; color: #a855f7; border: 2px solid #a855f7; width: 100%; 
+            padding: 14px; margin-top: 25px; border-radius: 8px; font-size: 16px; cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        .toggle-purple-btn:hover { background: rgba(168, 85, 247, 0.1); box-shadow: 0 0 10px rgba(168, 85, 247, 0.2); }
+        .toggle-purple-btn.active-glow {
+            background: #a855f7; color: #fff; border-color: #a855f7;
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.6);
+        }
+
+        .toggle-red-btn {
+            background: transparent; color: #ef4444; border: 2px solid #ef4444; width: 100%; 
+            padding: 14px; margin-top: 25px; border-radius: 8px; font-size: 16px; cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        .toggle-red-btn:hover { background: rgba(239, 68, 68, 0.1); box-shadow: 0 0 10px rgba(239, 68, 68, 0.2); }
+        .toggle-red-btn.active-glow {
+            background: #ef4444; color: #fff; border-color: #ef4444;
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+        }
+
+        .editor-container { display: flex; flex-wrap: wrap; gap: 30px; margin-top: 20px; justify-content: center; }
+        .controls { flex: 1; min-width: 280px; max-width: 400px; background: #18181b; padding: 20px; border-radius: 12px; border: 1px solid #27272a; }
+        .preview {
+            flex: 1; min-width: 220px; max-width: 300px; display: flex; flex-direction: column;
+            align-items: center; background: #18181b; padding: 20px; border-radius: 12px; border: 1px solid #27272a;
+        }
+        
+        .range-container { margin-bottom: 15px; }
+        .range-container label { display: flex; justify-content: space-between; font-size: 14px; color: #a1a1aa; font-weight: 600; }
+        input[type="range"] { margin-top: 5px; cursor: pointer; accent-color: var(--accent); }
+
+        .bg-selector-row {
+            display: flex; align-items: center; gap: 10px; margin-top: 15px; margin-bottom: 5px;
+        }
+        .bg-selector-row span { font-size: 13px; color: #a1a1aa; font-weight: 600; }
+        .bg-box {
+            width: 28px; height: 28px; border-radius: 6px; cursor: pointer; border: 2px solid #3f3f46;
+            transition: all 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        .bg-box:hover { transform: scale(1.1); border-color: var(--accent); }
+        .bg-box.selected { border-color: var(--accent); box-shadow: 0 0 10px var(--accent); transform: scale(1.05); }
+        .bg-black { background-color: #000000; }
+        .bg-white { background-color: #ffffff; }
+
+        canvas { 
+            border: 4px solid #3f3f46; border-radius: 10px; image-rendering: pixelated; box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+            background-color: #27272a; 
+            background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .mini-anim-box {
+            min-height: 90px; background: rgba(0,0,0,0.3); border: 1px dashed #3f3f46; border-radius: 10px;
+            margin-top: 20px; display: flex; align-items: center; justify-content: center;
+            gap: 20px; font-size: 2.5em; padding: 15px; flex-wrap: wrap;
+        }
+        .anim-element { 
+            opacity: 0; transform: translateY(20px);
+            animation: floatIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+        @keyframes floatIn { to { opacity: 1; transform: translateY(0); } }
+
+        /* Chat Sistemi & AI Asistan */
+        .chat-header { 
+            display: flex; justify-content: space-between; align-items: center; 
+            border-bottom: 2px solid #27272a; padding-bottom: 15px; margin-bottom: 20px; 
+        }
+        .chat-header h3 { 
+            margin: 0; display: flex; align-items: center; gap: 10px; font-size: 1.4em; line-height: 1;
+        }
+        
+        .ai-toggle-btn { 
+            font-size: 14px; padding: 8px 18px; border-radius: 20px; font-weight: bold;
+            margin: 0; display: inline-flex; align-items: center; justify-content: center; height: auto;
+            cursor: pointer; transition: all 0.3s; border: none;
+        }
+        .ai-toggle-btn.state-open { 
+            background: #a855f7; color: #ffffff; 
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.4); 
+        }
+        .ai-toggle-btn.state-closed { 
+            background: #22c55e; color: #ffffff; 
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.4); 
+        }
+        
+        .chat-container { 
+            background: #0f0f13; border-radius: 12px; padding: 15px; height: 350px; overflow-y: auto; 
+            border: 1px solid #27272a; display: flex; flex-direction: column; gap: 12px; 
+            box-shadow: inset 0 5px 15px rgba(0,0,0,0.5);
+        }
+        .chat-msg { 
+            padding: 12px 16px; border-radius: 10px; font-size: 14px; line-height: 1.5; max-width: 90%;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        .chat-msg strong { display: block; margin-bottom: 5px; font-size: 12px; letter-spacing: 0.5px; opacity: 0.9; }
+        
+        .chat-msg.admin { background: #14532d; color: #dcfce7; border-left: 4px solid #22c55e; }
+        .chat-msg.ai { background: #2e1065; color: #ede9fe; border-left: 4px solid #a855f7; border-bottom-right-radius: 4px;}
+        .chat-msg.user { background: #1e3a8a; color: #dbeafe; border-right: 4px solid #3b82f6; align-self: flex-end; border-bottom-left-radius: 4px;}
+        .chat-msg.warning { background: #7f1d1d; color: #fecaca; border-left: 4px solid #ef4444; }
+        
+        .chat-input-area { display: flex; gap: 12px; margin-top: 15px; background: #18181b; padding: 10px; border-radius: 10px; border: 1px solid #27272a; align-items: center;}
+        .chat-input-area input { margin-top: 0; flex: 1; border: none; background: #27272a; padding: 12px 15px; font-size: 15px; }
+        .chat-input-area button { margin-top: 0; padding: 12px 22px; border-radius: 8px; font-size: 15px; white-space: nowrap; font-weight: bold;}
+        
+        .advanced-spinner { display: inline-flex; gap: 5px; align-items: center; margin-left: 10px; }
+        .advanced-spinner span {
+            width: 8px; height: 8px; background-color: var(--accent); border-radius: 50%;
+            animation: pulseSpin 1.4s infinite cubic-bezier(0.4, 0, 0.2, 1) both;
+        }
+        .advanced-spinner span:nth-child(1) { animation-delay: -0.32s; background-color: #facc15; }
+        .advanced-spinner span:nth-child(2) { animation-delay: -0.16s; background-color: #a855f7; }
+        .advanced-spinner span:nth-child(3) { background-color: #3b82f6; }
+
+        @keyframes pulseSpin {
+            0%, 80%, 100% { transform: scale(0.4); opacity: 0.5; }
+            40% { transform: scale(1.4); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1 class="main-title">Oyun Merkezi</h1>
+
+    <div class="intro-section" id="intro">
+        <h2>Sınırları Zorlayan Bir Deneyim</h2>
+        <p>Bu platform; yüzlerce satır kodun, bitmek bilmeyen hata ayıklama süreçlerinin, uykusuz saatlerin ve ekran başında harcanan yoğun zihinsel emeğin bir eseridir. Her bir animasyonun pürüzsüz çalışması, karakter düzenleyicinin piksellerinin milimetrik hesaplanması ve veri tabanının kusursuz bir mimariyle oturtulması için büyük bir çaba sarf edildi.</p>
+        
+        <div class="trailer">
+            <strong>🎬 Sizi Neler Bekliyor? (Kısa Bir Ön İzleme):</strong><br>
+            Brawl Stars arenasında meta belirleyen detaylı harita taktikleri, Minecraft evreninde Chibi skin laboratuvarı, Roblox dünyasında arkadaş rehberleri ve <b>Among Us</b> evrenindeki güncel özel roller ile strateji rehberleri; üstelik tüm sorularını yanıtlayan akıllı yapay zeka asistanı seni bekliyor!
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('brawl')">Brawl Stars</button>
+        <button class="tab-btn" onclick="switchTab('minecraft')">Minecraft</button>
+        <button class="tab-btn" onclick="switchTab('roblox')">Roblox</button>
+        <button class="tab-btn" onclick="switchTab('amongus')">Among Us</button>
+        <button class="tab-btn" onclick="switchTab('yardim')">Yardım & AI Asistan</button>
+    </div>
+
+    <!-- BRAWL STARS BÖLÜMÜ -->
+    <div id="brawl" class="section active">
+        <h2>Brawl Stars Taktik Üssü</h2>
+        <p style="color: #a1a1aa;">Her mod için oyuncular tarafından en çok sevilen ve rekabetçi haritaları seçtik. Meta taktikleri detaylıca incele!</p>
+        
+        <select id="mapSelect" onchange="loadBrawlTactic()">
+            <option value="">-- En İyi Haritayı Seç --</option>
+            <option value="savas_topu">Savaş Topu: Sinsi Tarla (Sneaky Fields)</option>
+            <option value="elmas_kapmaca">Elmas Kapmaca: Sert Maden (Hard Rock Mine)</option>
+            <option value="hesaplasma">Hesaplaşma: Kafatası Deresi (Skull Creek)</option>
+        </select>
+
+        <div id="brawlResult" class="smooth-expand">
+            <div class="smooth-expand-inner">
+                <div class="result-box">
+                    <h3 id="bs-best" style="color:var(--accent); margin-top:0;">Önerilen En İyi Karakterler: </h3>
+                    <p id="bs-tactic"><strong>Detaylı Taktik:</strong> </p>
+                </div>
+                
+                <div class="result-box counter-box">
+                    <h3 style="margin-top:0; color:#ef4444;">🛡️ Rakip Takım Taktikleri (Anti-Taktik)</h3>
+                    <p id="bs-counter"></p>
+                </div>
+                <div class="mini-anim-box" id="bs-anim-box"></div>
+            </div>
+        </div>
+
+        <button class="toggle-friend-btn" onclick="toggleSection('bsFriendBox', this)">🤝 Brawl Stars: Detaylı Takım Arkadaşı Bulma Rehberini Aç / Kapat</button>
+        
+        <div id="bsFriendBox" class="smooth-expand">
+            <div class="smooth-expand-inner">
+                <div class="result-box friend-box">
+                    <h3 style="color: #3b82f6; margin-top:0;">🤝 Mükemmel Takımı Kurma Rehberi</h3>
+                    <p style="color: #94a3b8; font-size: 14px;">Brawl Stars'ta rastgele oyuncularla kupa kasmak, özellikle 750+ kupalarda imkansızlaşır. İşte profesyonellerin kalıcı takım kurma taktikleri:</p>
+                    <ul style="line-height: 1.8; color: #cbd5e1;">
+                        <li><b>🎯 Büyüteç (Takım Ara) Sisteminin Sırrı:</b> Çoğu oyuncu bunu yanlış kullanıyor. Oynamak istediğin karakteri <i>seçmeden önce</i> büyütece bas. Sistem seni kupa aralığına uygun, benzer ping seviyesine sahip oyuncularla eşleştirir. Odaya girince birbirinizin eksiklerini kapatacak karakterler seçin.</li>
+                        <li><b>🏰 Aktif ve Lige Odaklı Kulüplere Katılım:</b> Etkinlikleri her hafta tamamlayan, kupa sınırları olan kulüplere girmelisin. Kalıcı duo/trio arkadaşı bulmanın en sağlam yoludur.</li>
+                        <li><b>🎧 E-Spor Toplulukları ve Discord Sunucuları:</b> Türkiye'deki dev Brawl Stars Discord sunucularında "Kupa Kasma" sesli odalarına girip iletişimle oynamak kazanma oranını %70 artırır.</li>
+                        <li><b>⚔️️ Takım Kompozisyonu Anlaşması:</b> Biri agresif oynarken diğeri onu destekleyen veya alanı koruyan oynamalıdır. Üç suikastçı olan takımlar genelde kaybeder.</li>
+                    </ul>
+                    <div class="mini-anim-box" id="bs-friend-anim"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MINECRAFT BÖLÜMÜ -->
+    <div id="minecraft" class="section">
+        <h2>Minecraft Merkezi</h2>
+        <p style="color: #a1a1aa;">Sınırları olmayan blok evreninde hem karakterini tasarla hem de hayatta kalma ustası ol!</p>
+        
+        <div class="result-box">
+            <h3 style="color:var(--accent); margin-top:0;">🎨 Chibi Karakter (Skin) Laboratuvarı</h3>
+            <p style="color: #a1a1aa; font-size: 14px;">Kendi skin dosyanı yükle ve karakterini anında sevimli bir "Chibi" tasarıma dönüştür!</p>
+            
+            <div class="editor-container">
+                <div class="controls">
+                    <input type="file" id="skinInput" accept="image/png" onchange="loadSkin(event)" style="background: #27272a; border:1px solid #3f3f46;">
+                    <hr style="border-color: #27272a; margin: 20px 0;">
+                    <p style="color:#facc15; font-size: 13px; text-align: center; margin-top:0; font-weight: bold;">⚙️ Chibi Ayarlamaları</p>
+                    
+                    <div class="range-container"><label><span>Kafa (Büyük)</span> <span id="valHead">150%</span></label><input type="range" id="scaleHead" min="50" max="250" value="150" oninput="updateSkinPreview()"></div>
+                    <div class="range-container"><label><span>Gövde (Küçük)</span> <span id="valBody">70%</span></label><input type="range" id="scaleBody" min="40" max="200" value="70" oninput="updateSkinPreview()"></div>
+                    <div class="range-container"><label><span>Kollar (Küçük)</span> <span id="valArms">70%</span></label><input type="range" id="scaleArms" min="40" max="200" value="70" oninput="updateSkinPreview()"></div>
+                    <div class="range-container"><label><span>Bacaklar (Küçük)</span> <span id="valLegs">70%</span></label><input type="range" id="scaleLegs" min="40" max="200" value="70" oninput="updateSkinPreview()"></div>
+                    
+                    <button onclick="downloadHeadIcon()" class="btn-download-icon" style="margin-top: 15px; width: 100%; padding: 12px; font-size: 14px;">🖼️ Sadece Kafa İkonunu İndir</button>
+                    <button onclick="downloadMinecraftSkin()" class="btn-download-mc">🎮 Minecraft'ta Kullanmak İçin İndir</button>
+                </div>
+                <div class="preview">
+                    <h4 style="margin: 0 0 10px 0; color: #e4e4e7;">Canlı Önizleme</h4>
+                    <div class="bg-selector-row">
+                        <span>Arka Plan:</span>
+                        <div class="bg-box bg-black selected" onclick="setCanvasBackground('#000000', this)"></div>
+                        <div class="bg-box bg-white" onclick="setCanvasBackground('#ffffff', this)"></div>
+                    </div>
+                    <canvas id="skinCanvas" width="160" height="240"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="result-box" style="margin-top: 30px;">
+            <h3 style="color:var(--accent); margin-top:0;">🌍 Adım Adım Dünya Rehberi</h3>
+            <select id="worldSelect" onchange="loadWorldGuide()">
+                <option value="">-- Dünya Türünü Seçin --</option>
+                <option value="hayatta_kalma">Hayatta Kalma (Survival)</option>
+                <option value="zorlayici">Zorlayıcı (Hardcore)</option>
+                <option value="yaratici">Yaratıcı (Creative)</option>
+            </select>
+            
+            <div id="mcResult" class="smooth-expand">
+                <div class="smooth-expand-inner" style="padding-top:15px;">
+                    <ul id="mc-guide-list" style="line-height: 1.8; color: #d4d4d8;"></ul>
+                    <div class="mini-anim-box" id="mc-anim-box"></div>
+                </div>
+            </div>
+        </div>
+
+        <button class="toggle-friend-btn" onclick="toggleSection('mcFriendBox', this)">🤝 Minecraft: Yoldaş ve Sunucu Bulma Rehberini Aç / Kapat</button>
+        <div id="mcFriendBox" class="smooth-expand">
+            <div class="smooth-expand-inner">
+                <div class="result-box friend-box">
+                    <h3 style="color: #3b82f6; margin-top:0;">🤝 Yoldaş ve Topluluk Bulma Rehberi</h3>
+                    <ul style="line-height: 1.8; color: #cbd5e1;">
+                        <li><b>⚔️ Mini-Game Odaklı Tanışmalar:</b> Bed Wars veya Sky Wars lobilerinde duo arayarak PvP odaklı kalıcı arkadaşlar edinebilirsin.</li>
+                        <li><b>🌲 SMP Dünyaları:</b> Forum ve Discord topluluklarında 5-10 kişilik gruplarla özel Survival sunucuları açıp uzun soluklu maceralar yaşayabilirsin.</li>
+                        <li><b>🏰 Faction ve Towny Sunucuları:</b> Büyük klanlara katılarak ortak düşmanlara karşı savaşabilir, sanal bir şehir topluluğu kurabilirsin.</li>
+                    </ul>
+                    <div class="mini-anim-box" id="mc-friend-anim"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ROBLOX BÖLÜMÜ -->
+    <div id="roblox" class="section">
+        <h2>Roblox Evreni</h2>
+        <p style="color: #a1a1aa;">Milyonlarca oyun arasından sıyrılıp en iyi deneyimi yaşaman için Roblox ipuçları!</p>
+        
+        <button class="toggle-friend-btn" onclick="toggleSection('rbFriendBox', this)">🤝 Roblox: Arkadaş Bulma Rehberini Aç / Kapat</button>
+        <div id="rbFriendBox" class="smooth-expand">
+            <div class="smooth-expand-inner">
+                <div class="result-box friend-box">
+                    <h3 style="color: #3b82f6; margin-top:0;">🤝 Arkadaş Bulma Rehberi</h3>
+                    <ul style="line-height: 1.8; color: #cbd5e1;">
+                        <li><b>🎭 Popüler RP Oyunları:</b> Brookhaven RP gibi oyunlarda rol yaparak kalıcı arkadaşlar bulabilirsin.</li>
+                        <li><b>🎙️ Sesli Sohbet (Spatial Voice):</b> Mikrofon açarak insanlarla çok daha hızlı ve samimi bağlar kurabilirsin.</li>
+                        <li><b>🤝 Niş Topluluklar:</b> İlgi alanlarına uygun özel Roblox gruplarına ve Discord sunucularına katıl.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <button class="toggle-purple-btn" onclick="toggleSection('rbGamesBox', this)">🎮 Roblox: Hangi Oyunlarda Oynanmalı? Rehberini Aç / Kapat</button>
+        <div id="rbGamesBox" class="smooth-expand">
+            <div class="smooth-expand-inner">
+                <div class="result-box counter-box" style="margin-top: 15px; border-left-color: #a855f7;">
+                    <h3 style="color:#a855f7; margin-top:0;">🎮 Hangi Oyunlarda Oynanmalı?</h3>
+                    <ul style="line-height: 1.8; color: #cbd5e1;">
+                        <li><b>🌱 Başlangıç İçin:</b> Brookhaven RP, Tower of Hell, Adopt Me!</li>
+                        <li><b>🔥 Rekabet Seven Veteranlar İçin:</b> Blox Fruits (PvP), Phantom Forces (FPS), Doors (Korku/Strateji).</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AMONG US BÖLÜMÜ -->
+    <div id="amongus" class="section">
+        <h2>Among Us Uzay Üssü</h2>
+        <p style="color: #a1a1aa;">Uzay gemisinde masum bir mürettebat mısın yoksa gizli bir katil mi? Tüm modlar, güncel roller ve arkadaş bulma taktikleri burada!</p>
+        
+        <!-- Oyun Modları Seçimi -->
+        <select id="amongModeSelect" onchange="loadAmongMode()">
+            <option value="">-- Oyun Modunu Seçin --</option>
+            <option value="klasik">🚀 Klasik Mod (Classic Mode)</option>
+            <option value="rollu">🎭 Rollü Mod (Roles Mode)</option>
+            <option value="saklambac">🏃 Saklambaç Modu (Hide and Seek)</option>
+        </select>
+
+        <div id="amongResult" class="smooth-expand">
+            <div class="smooth-expand-inner">
+                <div class="result-box" style="border-left-color: #ef4444;">
+                    <h3 id="au-mode-title" style="color:#ef4444; margin-top:0;">Mod Rehberi</h3>
+                    <p id="au-mode-guide" style="color:#d4d4d8; line-height:1.7;"></p>
+                </div>
+                <div class="mini-anim-box" id="au-anim-box"></div>
+            </div>
+        </div>
+
+        <!-- Güncel ve Yeni Roller Rehberi -->
+        <button class="toggle-red-btn" onclick="toggleSection('auRolesBox', this)">🎭 Güncel Roller ve Oynanış Rehberini Aç / Kapat</button>
+        <div id="auRolesBox" class="smooth-expand">
+            <div class="smooth-expand-inner">
+                <div class="result-box" style="border-left-color: #312e81; background: #121026;">
+                    <h3 style="color:#818cf8; margin-top:0;">😇 Mürettebat (Crewmate) Özel Rolleri</h3>
+                    <ul style="line-height: 1.8; color: #cbd5e1; list-style-type: none; padding-left:0;">
+                        <li style="margin-bottom: 12px;"><b>🧪 Scientist (Bilim İnsanı):</b> Ekranda portatif Vitals paneli taşır. Görev yaptıkça pili şarj olur. Katil cinayet işlediği an ölen kişinin nabzı durur; bunu fark ettiğin saniye acil toplantı butonuna basarak katili anında yakalayabilirsin!</li>
+                        <li style="margin-bottom: 12px;"><b>🔧 Engineer (Mühendis):</b> Impostor'lar gibi havalandırma (vent) borularına girebilir! Ventte kalma süren sınırlıdır. Saklanan katili havalandırmada yakalayabilir veya katilin çıktığı anı izleyebilirsin. Ancak dikkat et, diğer oyuncular seni ventten çıkarken görürse katil sanabilir!</li>
+                        <li style="margin-bottom: 12px;"><b>👼 Guardian Angel (Koruyucu Melek):</b> Oyunda öldürülen İLK mürettebat bu role bürünür. Ruh halindeyken hayatta kalan arkadaşlarına geçici koruyucu kalkan (shield) verir. Katil saldırdığı an kalkan patlar ve öldürme boşa çıkar.</li>
+                        <li style="margin-bottom: 12px;"><b>📡 Tracker (İzleyici):</b> Şüphelendiğin bir oyuncunun üzerine takip cihazı takarsın. Haritayı açtığında o oyuncunun hangi odada kaç saniye beklediğini ve nereye kaçtığını canlı kırmızı simge ile izlersin.</li>
+                        <li style="margin-bottom: 12px;"><b>📢 Noisemaker (Gürültücü):</b> Katil seni katlettiği anda ekranında ve tüm haritada yüksek sesli görsel bir sinyal yayılır! Katilin kaçtığı yönü ok işaretiyle göstererek katilin kaçmasına izin vermezsin.</li>
+                    </ul>
+
+                    <hr style="border-color: #312e81; margin: 20px 0;">
+
+                    <h3 style="color:#ef4444; margin-top:0;">😈 Katil (Impostor) Özel Rolleri</h3>
+                    <ul style="line-height: 1.8; color: #cbd5e1; list-style-type: none; padding-left:0;">
+                        <li style="margin-bottom: 12px;"><b>🎭 Shapeshifter (Şekil Değiştiren):</b> Yaşayan herhangi bir oyuncunun görünümüne ve rengine bürünebilirsin. Başkasının kılığına girip başkasının gözü önünde adam öldür ve masumları birbirine düşür! Dönüşüm esnasında geride kabuk bıraktığın için kameralardan uzakta dönüşmeye dikkat et.</li>
+                        <li style="margin-bottom: 12px;"><b>👻 Phantom (Hayalet Katil):</b> Belli bir süreliğine tamamen görünmez olursun! Kalabalığın arasına görünmez girip birini katlet ve vent kullanmaya bile gerek kalmadan yürüyerek olay yerinden uzaklaş.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Arkadaş Bulma ve Lobi Rehberi -->
+        <button class="toggle-friend-btn" onclick="toggleSection('auFriendBox', this)">🤝 Among Us: Arkadaş Bulma ve Lobi Rehberini Aç / Kapat</button>
+        <div id="auFriendBox" class="smooth-expand">
+            <div class="smooth-expand-inner">
+                <div class="result-box friend-box">
+                    <h3 style="color: #3b82f6; margin-top:0;">🤝 Kafa Dengi Ekip & Lobi Bulma Rehberi</h3>
+                    <p style="color: #94a3b8; font-size: 14px;">Rastgele lobilerde sebepsiz yere oy veren veya oyundan çıkanlardan bıktıysan işte profesyonel lobi kurma taktikleri:</p>
+                    <ul style="line-height: 1.8; color: #cbd5e1;">
+                        <li><b>🆔 Arkadaş Kodu (Friend Code) Sistemi:</b> Oyun sonu özet ekranında veya profil kartından oyuncuların 12 haneli arkadaş kodlarını alarak oyun içi arkadaş listene ekle. Böylece kendi 15 kişilik özel odanı kurup onları tek tıkla davet edebilirsin.</li>
+                        <li><b>💬 Free Chat (Açık Sohbet) Filtresi:</b> Lobi ararken arama filtresini mutlaka "Free Chat" ve "15 Players" yap. Quick Chat (Hızlı Mesaj) lobilerinde özgürce iddialaşamaz ve taktik yapamazsın.</li>
+                        <li><b>🎧 Proximity Voice Chat (Yakınlık Sesli Sohbet):</b> Discord topluluklarında "Among Us Türkiye" odalarına katılarak oyunu sesli oyna. Ses tonundan kimin yalan söylediğini anlamak oyun zevkini 10 katına çıkarır!</li>
+                        <li><b>⚙️ Ideal Lobi Ayarları (Özel Sunucular):</b> 15 kişilik lobilerde 3 Impostor, %100 Shapeshifter ve %100 Engineer açık ayarlarda oynamak en yüksek kaosu ve stratejiyi sağlar.</li>
+                    </ul>
+                    <div class="mini-anim-box" id="au-friend-anim"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- YARDIM VE SORULAR BÖLÜMÜ -->
+    <div id="yardim" class="section">
+        <h2>Yardım ve İletişim</h2>
+        <p style="color: #a1a1aa; font-size: 15px; line-height: 1.7; margin-bottom: 25px;">
+            Sitemizdeki özellikler hakkında yardıma mı ihtiyacınız var? Roblox rehberleri, Brawl Stars taktikleri, Minecraft Chibi laboratuvarı veya <b>Among Us özel rolleri</b> hakkında her şeyi bilen <b>AI Asistanımız</b> size saniyeler içinde rehberlik edebilir!<br><br>
+            Ayrıca teknik sorularınızı veya geri bildirimlerinizi yapay zeka modunu kapatarak e-posta yoluyla doğrudan bize iletebilirsiniz.
+        </p>
+        
+        <div class="result-box" style="padding: 0; background: transparent; border: none;">
+            <div class="chat-header">
+                <h3 style="margin:0;">💬 İletişim Hattı</h3>
+                <button id="aiToggleBtn" class="ai-toggle-btn state-open" onclick="toggleAIMode()">AI Asistan: Açık</button>
+            </div>
+            
+            <div class="chat-container" id="chatBox">
+                <!-- Chat Mesajları -->
+            </div>
+            
+            <div class="chat-input-area">
+                <input type="text" id="chatInput" placeholder="Sadece site ve oyunlar hakkında sorunuzu yazın..." onkeypress="handleEnter(event)">
+                <button id="sendBtn" onclick="sendChat()" style="background: #a855f7;">Asistana Sor</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let aiMode = true;
+        let aiStrikeCount = 0; 
+
+        window.onload = () => {
+            if(localStorage.getItem("site_banned") === "true") {
+                showBannedScreen();
+                return;
+            }
+
+            updateSkinPreview();
+            playMiniAnim('bs-friend-anim', ['🎮', '🤝', '🔥', '🏆', '🫂']);
+            playMiniAnim('mc-friend-anim', ['🌍', '⛏️', '🏰', '🤝', '🏕️']);
+            playMiniAnim('au-friend-anim', ['🚀', '🛰️', '🤝', '🔍', '🏆']);
+            
+            addChatMsg("AI Asistan", "Merhaba! Ben bu sitenin asistanıyım. Sitemiz, Brawl Stars, Minecraft, Roblox ve Among Us hakkında herhangi bir sorunuz, merak ettiğiniz bir şey veya şikayetiniz varsa size yardımcı olabilirim.", "ai");
+        };
+
+        function showBannedScreen() {
+            document.body.innerHTML = `
+                <div style='display:flex; flex-direction:column; justify-content:center; align-items:center; height:100vh; background-color:#09090b; color:#ef4444; font-family:sans-serif; text-align:center; padding:20px;'>
+                    <h1 style='font-size:3em; margin-bottom:10px;'>⛔ ERİŞİM ENGELLENDİ ⛔</h1>
+                    <p style='font-size:1.5em; color:#a1a1aa; max-width:600px;'>Sistem kurallarını defalarca ihlal ettiğiniz için bu siteye erişiminiz kalıcı olarak engellendi.</p>
+                </div>
+            `;
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+            
+            if(tabId === 'minecraft') {
+                updateSkinPreview();
+            }
+        }
+
+        function toggleSection(sectionId, btnElement) {
+            const el = document.getElementById(sectionId);
+            el.classList.toggle('open');
+            if(btnElement) {
+                btnElement.classList.toggle('active-glow');
+            }
+        }
+
+        let currentCanvasBg = '#000000'; 
+        function setCanvasBackground(color, boxElement) {
+            currentCanvasBg = color;
+            const canvas = document.getElementById('skinCanvas');
+            canvas.style.backgroundColor = color;
+
+            document.querySelectorAll('.bg-box').forEach(b => b.classList.remove('selected'));
+            boxElement.classList.add('selected');
+            
+            updateSkinPreview();
+        }
+
+        const brawlData = {
+            savas_topu: {
+                best: "Mortis, Tara, Rico (Sinsi Tarla Haritası)",
+                tactic: "<b>Mortis:</b> Sinsi Tarla haritasında çalılıklar senin en büyük silahın. Topu ilk kapan olmak için atılganlığını kullan.<br><br><b>Tara:</b> Ultin dolana kadar uzaktan dürt. Kara Delik dolduğunda rakibin üçünü birden çekebileceğin anı bekle.<br><br><b>Rico:</b> Yan duvarları kullanarak mermileri sektir, darlıklardaki rakipleri erit.",
+                counter: "<b>Anti-Taktik:</b> Tara'ya karşı yan yana yürümeyin. Mortis'e karşı Bull veya Shelly ile kaleyi koruyun.",
+                anim: ['⚽', '🏃‍♂️', '🌪️', '🥅', '🎉']
+            },
+            elmas_kapmaca: {
+                best: "Pam, Gene, Spike (Sert Maden Haritası)",
+                tactic: "<b>Pam:</b> Elmas pınarına yerleş ve taretini korunaklı yere koy.<br><br><b>Gene:</b> Uzaktan dürt, elmas taşıyan rakibi son saniyede çek.<br><br><b>Spike:</b> Ultini elmas pınarına atıp alanı kapat.",
+                counter: "<b>Anti-Taktik:</b> Pam'in taretini patlatmak için fırlatıcı seçin.",
+                anim: ['💎', '🏥', '🎣', '🌵', '🏆']
+            },
+            hesaplasma: {
+                best: "Edgar, Buzz, Shelly (Kafatası Deresi Haritası)",
+                tactic: "<b>Kafatası Deresi:</b> Merkeze atlama, kenarlardaki kutuları toplayıp pusarak ulti şarj et.",
+                counter: "<b>Anti-Taktik:</b> Çalı kontrolü için Bo veya Tara tercih edin.",
+                anim: ['📦', '⚡', '🤺', '💥', '☠️']
+            }
+        };
+
+        function loadBrawlTactic() {
+            const val = document.getElementById("mapSelect").value;
+            const res = document.getElementById("brawlResult");
+            const selectBox = document.getElementById("mapSelect");
+            
+            if (val) {
+                document.getElementById("bs-best").innerText = "Önerilen En İyi Karakterler: " + brawlData[val].best;
+                document.getElementById("bs-tactic").innerHTML = "<strong>Detaylı Taktik:</strong><br>" + brawlData[val].tactic;
+                document.getElementById("bs-counter").innerHTML = brawlData[val].counter;
+                playMiniAnim('bs-anim-box', brawlData[val].anim);
+                res.classList.add('open');
+                selectBox.classList.add('active-select-glow'); 
+            } else { 
+                res.classList.remove('open'); 
+                selectBox.classList.remove('active-select-glow'); 
+            }
+        }
+
+        const mcData = {
+            hayatta_kalma: {
+                steps: [
+                    "<b>Adım 1:</b> Odun topla, yatak yap ve ilk gece sığınak kaz.",
+                    "<b>Adım 2:</b> Madene in, Y: -58 seviyesinde elmas ara.",
+                    "<b>Adım 3:</b> Nether portalı yap, Blaze çubuğu topla.",
+                    "<b>Adım 4:</b> Stronghold zindanını bulup Ejderhayı yen!"
+                ], anim: ['🌳', '⛏️', '🛏️', '💎', '🐉']
+            },
+            zorlayici: {
+                steps: [
+                    "<b>DİKKAT: TEK CANIN VAR!</b>",
+                    "İlk gün demir kalkan yap.",
+                    "Mağaralara dikine atlama, merdiven yaparak in.",
+                    "Ölümsüzlük Totemi (Totem of Undying) kullan."
+                ], anim: ['🛡️', '⚠️', '🍎', '🧟', '👼']
+            },
+            yaratici: {
+                steps: [
+                    "Düz dünyada (Flat) projeler tasarla.",
+                    "Kızıltaş (Redstone) otomasyonları kur.",
+                    "Komut blokları ile mini oyunlar yap."
+                ], anim: ['✈️', '🧱', '🔴', '⚙️', '🏰']
+            }
+        };
+
+        function loadWorldGuide() {
+            const val = document.getElementById("worldSelect").value;
+            const res = document.getElementById("mcResult");
+            const list = document.getElementById("mc-guide-list");
+            const selectBox = document.getElementById("worldSelect");
+            
+            if (val) {
+                list.innerHTML = ""; 
+                mcData[val].steps.forEach(item => {
+                    let li = document.createElement("li"); li.innerHTML = item; list.appendChild(li);
+                });
+                playMiniAnim('mc-anim-box', mcData[val].anim);
+                res.classList.add('open');
+                selectBox.classList.add('active-select-glow'); 
+            } else { 
+                res.classList.remove('open'); 
+                selectBox.classList.remove('active-select-glow'); 
+            }
+        }
+
+        const amongData = {
+            klasik: {
+                title: "🚀 Klasik Mod (Classic Mode)",
+                guide: "<b>Temel Mantık:</b> Mürettebat (Crewmate) tüm görevleri bitirmeye veya Impostor'ları oylamayla uzaya fırlatmaya çalışır. Impostor ise gizlice herkesi avlamalı veya sabotajla (Oksijen/Reaktör) oyunu bitirmelidir.<br><br><b>Taktikler:</b> Görev yaparken yalnız kalmamaya çalışın. Görsel görevleri (MedBay Scan, Asteroid Vurma) başkalarının önünde yapın. Tartışmalarda 'Neredeydin?', 'Kiminleydin?' sorularına net cevaplar verin.",
+                anim: ['🚀', '🔍', '🚨', '🗳️', '👑']
+            },
+            rollu: {
+                title: "🎭 Rollü Mod (Roles Mode)",
+                guide: "<b>Temel Mantık:</b> Klasik oyuna özel yeteneklere sahip roller (Scientist, Engineer, Guardian Angel, Tracker, Noisemaker, Shapeshifter, Phantom) eklenir.<br><br><b>Taktikler:</b> Rolünüzü hemen ifşa etmeyin! Mühendis iseniz havalandırmadan çıktığınızda katil sanılmamak için güvendiğiniz birine rolünüzü söyleyin. Şekil değiştiren katilseniz, dönüşmeden önce kameraların olmadığı karanlık odaları tercih edin.",
+                anim: ['🎭', '🧪', '🔧', '👼', '📡']
+            },
+            saklambac: {
+                title: "🏃 Saklambaç Modu (Hide and Seek)",
+                guide: "<b>Temel Mantık:</b> Katil oyunun en başında ifşa olur ve OYLAMA YOKTUR! Katil herkesi avlamaya çalışırken Mürettebat süreyi bitirmek için hızla görev yapar.<br><br><b>Taktikler:</b> Katilin konumunu gösteren 'Tehlike Metresi'ni (Danger Meter) takip edin. 'Final Hide' (Son Saklanma) aşamasında katil hızlanır ve konumlar açığa çıkar, sürekli hareket halinde kalın!",
+                anim: ['🏃‍♂️️', '🔪', '🔦', '⏰', '💨']
+            }
+        };
+
+        function loadAmongMode() {
+            const val = document.getElementById("amongModeSelect").value;
+            const res = document.getElementById("amongResult");
+            const selectBox = document.getElementById("amongModeSelect");
+            
+            if (val) {
+                document.getElementById("au-mode-title").innerText = amongData[val].title;
+                document.getElementById("au-mode-guide").innerHTML = amongData[val].guide;
+                playMiniAnim('au-anim-box', amongData[val].anim);
+                res.classList.add('open');
+                selectBox.classList.add('active-select-glow'); 
+            } else { 
+                res.classList.remove('open'); 
+                selectBox.classList.remove('active-select-glow'); 
+            }
+        }
+
+        function playMiniAnim(boxId, emojis) {
+            const box = document.getElementById(boxId); box.innerHTML = ''; 
+            emojis.forEach((emoji, index) => {
+                let el = document.createElement('div'); el.className = 'anim-element';
+                el.innerText = emoji; el.style.animationDelay = (index * 0.2) + 's'; box.appendChild(el);
+            });
+        }
+
+        // SKIN EDITOR
+        let uploadedSkinImg = null;
+        function loadSkin(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                uploadedSkinImg = new Image();
+                uploadedSkinImg.onload = () => { updateSkinPreview(); };
+                uploadedSkinImg.src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+
+        function updateSkinPreview() {
+            const canvas = document.getElementById('skinCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = currentCanvasBg;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            if (!uploadedSkinImg) {
+                ctx.fillStyle = currentCanvasBg === '#ffffff' ? "#71717a" : "#a1a1aa"; 
+                ctx.font = "14px Arial"; ctx.textAlign = "center";
+                ctx.fillText("Lütfen skin dosyası yükleyin", canvas.width / 2, canvas.height / 2);
+                return;
+            }
+
+            const scaleHead = document.getElementById('scaleHead').value / 100;
+            const scaleBody = document.getElementById('scaleBody').value / 100;
+            const scaleArms = document.getElementById('scaleArms').value / 100;
+            const scaleLegs = document.getElementById('scaleLegs').value / 100;
+
+            document.getElementById('valHead').innerText = document.getElementById('scaleHead').value + "%";
+            document.getElementById('valBody').innerText = document.getElementById('scaleBody').value + "%";
+            document.getElementById('valArms').innerText = document.getElementById('scaleArms').value + "%";
+            document.getElementById('valLegs').innerText = document.getElementById('scaleLegs').value + "%";
+            
+            ctx.imageSmoothingEnabled = false;
+            const baseScale = 5; const centerX = canvas.width / 2; 
+            const headCenterY = 50; 
+            const bodyCenterY = headCenterY + (8 * baseScale * scaleHead / 2) + (12 * baseScale * scaleBody / 2) - 5;
+            const armCenterY = bodyCenterY; 
+            const legCenterY = bodyCenterY + (12 * baseScale * scaleBody / 2) + (12 * baseScale * scaleLegs / 2);
+            
+            const rightArmCenterX = centerX - (8 * baseScale * scaleBody / 2) - (4 * baseScale * scaleArms / 2);
+            const leftArmCenterX = centerX + (8 * baseScale * scaleBody / 2) + (4 * baseScale * scaleArms / 2);
+            const rightLegCenterX = centerX - (4 * baseScale * scaleLegs / 2);
+            const leftLegCenterX = centerX + (4 * baseScale * scaleLegs / 2);
+
+            function drawPartFromCenter(sx, sy, sw, sh, cx, cy, scale) {
+                const drawWidth = sw * baseScale * scale; const drawHeight = sh * baseScale * scale;
+                const drawX = cx - (drawWidth / 2); const drawY = cy - (drawHeight / 2);
+                ctx.drawImage(uploadedSkinImg, sx, sy, sw, sh, drawX, drawY, drawWidth, drawHeight);
+            }
+
+            drawPartFromCenter(44, 20, 4, 12, rightArmCenterX, armCenterY, scaleArms);
+            drawPartFromCenter(36, 52, 4, 12, leftArmCenterX, armCenterY, scaleArms);
+            drawPartFromCenter(4, 20, 4, 12, rightLegCenterX, legCenterY, scaleLegs);
+            drawPartFromCenter(20, 52, 4, 12, leftLegCenterX, legCenterY, scaleLegs);
+            drawPartFromCenter(20, 20, 8, 12, centerX, bodyCenterY, scaleBody);
+            drawPartFromCenter(8, 8, 8, 8, centerX, headCenterY, scaleHead);
+            drawPartFromCenter(40, 8, 8, 8, centerX, headCenterY, scaleHead);
+        }
+
+        function downloadHeadIcon() {
+            if (!uploadedSkinImg) { alert("Lütfen önce bir skin yükleyin!"); return; }
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = 128; tempCanvas.height = 128;
+            const tCtx = tempCanvas.getContext('2d');
+            tCtx.imageSmoothingEnabled = false;
+            tCtx.drawImage(uploadedSkinImg, 8, 8, 8, 8, 0, 0, 128, 128);
+            tCtx.drawImage(uploadedSkinImg, 40, 8, 8, 8, 0, 0, 128, 128);
+            const link = document.createElement('a'); 
+            link.download = 'minecraft-kafa-ikon.png';
+            link.href = tempCanvas.toDataURL('image/png'); link.click();
+        }
+
+        function downloadMinecraftSkin() {
+            if (!uploadedSkinImg) { alert("Lütfen önce bir skin yükleyin!"); return; }
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = 64; tempCanvas.height = 64;
+            const tCtx = tempCanvas.getContext('2d');
+            tCtx.drawImage(uploadedSkinImg, 0, 0);
+            const link = document.createElement('a'); 
+            link.download = 'minecraft-uyumlu-skin.png';
+            link.href = tempCanvas.toDataURL('image/png'); link.click();
+        }
+
+        // AI ASİSTAN
+        function toggleAIMode() {
+            aiMode = !aiMode;
+            const btn = document.getElementById('aiToggleBtn');
+            const sendBtn = document.getElementById('sendBtn');
+            
+            if(aiMode) {
+                btn.className = "ai-toggle-btn state-open";
+                btn.innerText = "AI Asistan: Açık";
+                sendBtn.innerText = "Asistana Sor";
+                sendBtn.style.background = "#a855f7";
+                addChatMsg("AI Asistan", "Merhaba! Ben bu sitenin asistanıyım. Sorularınızı yanıtlamaktan mutluluk duyarım.", "ai");
+            } else {
+                btn.className = "ai-toggle-btn state-closed";
+                btn.innerText = "AI Asistan: Kapalı";
+                sendBtn.innerText = "Mail Gönder";
+                sendBtn.style.background = "#22c55e";
+                addChatMsg("Sistem Bilgisi", "Yapay zeka kapatıldı. Mesajınız geliştiriciye iletilecek.", "admin");
+            }
+        }
+
+        function handleEnter(e) { if(e.key === 'Enter') sendChat(); }
+
+        function generateAdvancedAIResponse(text) {
+            let lowerText = text.toLowerCase().trim();
+            
+            if (lowerText === "naber" || lowerText === "selam" || lowerText === "sa" || lowerText === "merhaba" || lowerText === "hey") {
+                return "Merhaba! Ben bu sitenin özel yapay zeka asistanıyım. Sitemizdeki özellikler, Brawl Stars meta taktikleri, Roblox oyun rehberleri, Minecraft Chibi laboratuvarı veya yeni eklenen Among Us özel roller/modlar hakkında sorularınızı yanıtlamak için buradayım!";
+            }
+            
+            if (lowerText.length <= 3) {
+                return `"${text.toUpperCase()}" sorunuzu tam anlayamadım. Lütfen daha detaylı bir cümleyle sorun.`;
+            }
+
+            let isSiteOrFeedback = lowerText.includes("site") || lowerText.includes("hata") || lowerText.includes("sorun") || lowerText.includes("şikayet");
+            let isMinecraft = lowerText.includes("minecraft") || lowerText.includes("skin") || lowerText.includes("chibi");
+            let isBrawlStars = lowerText.includes("brawl") || lowerText.includes("taktik") || lowerText.includes("harita");
+            let isRoblox = lowerText.includes("roblox") || lowerText.includes("hangi oyun");
+            let isAmongUs = lowerText.includes("among") || lowerText.includes("impostor") || lowerText.includes("crewmate") || lowerText.includes("katil") || lowerText.includes("mürettebat") || lowerText.includes("shapeshifter") || lowerText.includes("scientist") || lowerText.includes("saklambaç") || lowerText.includes("rol");
+
+            if (isAmongUs) {
+                return "Among Us bölümümüzde hem yeni başlayanlar hem de usta oyuncular için devasa rehberler yer alıyor! Klasik Mod, Rollü Mod ve Saklambaç (Hide and Seek) modlarının detaylarını; Scientist, Engineer, Guardian Angel, Tracker, Noisemaker, Shapeshifter ve Phantom gibi tüm güncel özel rollerin kullanım taktiklerini öğrenebilirsin. Ayrıca 15 kişilik lobiler ve Arkadaş Kodu (Friend Code) ile nasıl kafa dengi ekip kurabileceğini inceleyebilirsin!";
+            }
+            else if (isSiteOrFeedback) {
+                return "Sitemiz, oyunculara en detaylı bilgileri sunmak için tasarlanmıştır. Bir hata veya öneriniz varsa lütfen bana detaylarını iletin.";
+            } 
+            else if (isMinecraft) {
+                return "Minecraft bölümümüzde Chibi Karakter Laboratuvarı ve dünya rehberleri bulunuyor.";
+            } 
+            else if (isBrawlStars) {
+                return "Brawl Stars bölümümüzde güncel harita metaları ve takım arkadaşı bulma rehberleri yer alıyor.";
+            }
+            else if (isRoblox) {
+                return "Roblox bölümümüzde başlangıç ve veteran oyuncular için tavsiye rehberleri yer alıyor.";
+            }
+            else {
+                return "Sistem kısıtlamalarım gereği yalnızca sitemiz ve Brawl Stars, Minecraft, Roblox ve Among Us hakkında bilgi verebilirim. Lütfen bu konular hakkında soru sorun!";
+            }
+        }
+
+        const exactBadWords = ["am", "aq", "amk", "amq", "oc", "oç", "piç", "pic", "sik", "mal", "sg", "göt", "lan", "sie", "mk"];
+        const exactPattern = new RegExp("\\b(" + exactBadWords.join("|") + ")\\b", "i");
+        const containsBadWords = ["siktir", "sikeyim", "orosbu", "orospu", "yarrak", "yarak", "gerizekalı", "salak", "aptal"];
+        const containsPattern = new RegExp("(" + containsBadWords.join("|") + ")", "i");
+        const politeWords = ["özür", "pardon", "kusura", "affedersin", "tamam", "haklısın"];
+        const negativeAdjectives = ["çöp", "berbat", "iğrenç", "bok", "rezil", "leş", "kötü"];
+        const targetSubjects = ["site", "oyun", "roblox", "minecraft", "brawl", "among", "asistan", "kod", "tasarım"];
+
+        function sendChat() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if(text === "") return;
+
+            addChatMsg("Siz", text, "user");
+            input.value = "";
+
+            if(aiMode) {
+                const lowerText = text.toLowerCase();
+                let isBadWord = exactPattern.test(lowerText) || containsPattern.test(lowerText);
+                let isTargetMentioned = targetSubjects.some(t => lowerText.includes(t));
+                let isNegativeMentioned = negativeAdjectives.some(n => lowerText.includes(n));
+                let isNegative = isTargetMentioned && isNegativeMentioned;
+                let isPolite = politeWords.some(p => lowerText.includes(p));
+
+                if (isPolite && !isBadWord && !isNegative) {
+                    aiStrikeCount = Math.max(0, aiStrikeCount - 1);
+                    setTimeout(() => { addChatMsg("AI Asistan", "✨ Özrünü kabul ediyorum. Yardımcı olmaya devam edebilirim.", "ai"); }, 500);
+                    return;
+                }
+                
+                if (isBadWord || isNegative) {
+                    aiStrikeCount++;
+                    setTimeout(() => {
+                        if (aiStrikeCount === 1) {
+                            addChatMsg("AI Asistan", "⚠️ <b>UYARI!</b> Lütfen saygılı bir üslup kullanın.", "warning");
+                        } else if (aiStrikeCount === 2) {
+                            addChatMsg("AI Asistan", "🛑 <b>SON UYARI!</b> Seviyeli konuşmazsanız engelleneceksiniz.", "warning");
+                        } else if (aiStrikeCount >= 3) {
+                            addChatMsg("AI Asistan", "⛔ <b>ERİŞİM KESİLDİ!</b> Kuralları ihlal ettiğiniz için engellendiniz.", "warning");
+                            localStorage.setItem("site_banned", "true");
+                            document.getElementById('chatInput').disabled = true;
+                            document.getElementById('sendBtn').disabled = true;
+                            setTimeout(() => { showBannedScreen(); }, 2000);
+                        }
+                    }, 500);
+                    return;
+                }
+
+                const box = document.getElementById('chatBox');
+                const thinkingMsg = document.createElement('div');
+                thinkingMsg.className = 'chat-msg ai';
+                thinkingMsg.id = 'thinkingId';
+                thinkingMsg.innerHTML = `<strong>AI Asistan Analiz Ediyor...</strong> <span id="thinkText" style="color: #a1a1aa; font-style: italic; font-size: 14px;">Girdi inceleniyor</span> <div class="advanced-spinner"><span></span><span></span><span></span></div>`;
+                box.appendChild(thinkingMsg);
+                box.scrollTop = box.scrollHeight; 
+
+                setTimeout(() => {
+                    document.getElementById('thinkingId').remove();
+                    const response = generateAdvancedAIResponse(text);
+                    addChatMsg("AI Asistan", response, "ai");
+                }, 1800);
+                
+            } else {
+                setTimeout(() => {
+                    window.location.href = `mailto:melihkara440@gmail.com?subject=Oyun Merkezi İletişim&body=${encodeURIComponent(text)}`;
+                    addChatMsg("Sistem Bilgisi", "Mesajınız mail olarak yönlendirildi.", "admin");
+                }, 500);
+            }
+        }
+
+        function addChatMsg(sender, text, type) {
+            const box = document.getElementById('chatBox');
+            const newMsg = document.createElement('div');
+            newMsg.className = `chat-msg ${type}`;
+            newMsg.innerHTML = `<strong>${sender}</strong> ${text}`;
+            box.appendChild(newMsg);
+            box.scrollTop = box.scrollHeight; 
+        }
+    </script>
+</body>
+</html>
